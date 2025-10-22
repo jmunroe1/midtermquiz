@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIST 5300 Midterm Project - Glacier National Park Analysis</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            margin: 10px 0 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        #timeChart, #scatterChart {
+            height: 400px;
+            width: 100%;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px;
+            min-width: 150px;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+        }
+
+        .analysis-box {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .methodology-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+            margin: 15px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .student-info {
+            background: #e8f6f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #16a085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> Glacier National Park Climate Study</h1>
+            <p class="subtitle">GIST 5300 Midterm Project - Analyzing Glacier Loss and Tourism Patterns</p>
+        </header>
+
+        <div class="student-info">
+            <h3>Project Information</h3>
+            <p><strong>Student:</strong> Jonathan Munroe</p>
+            <p><strong>Course:</strong> GIST 5300 - Web Mapping and Internet GIS</p>
+            <p><strong>Date:</strong> October 23, 2025</p>
+            <p><strong>Assignment:</strong> Midterm Assessment</p>
+        </div>
+
+        <div class="section">
+            <h2>Project Overview</h2>
+            <p>This project examines the relationship between glacier retreat and park visitation at Glacier National Park from 1966 to 2015. Using web GIS technologies including Leaflet maps and Plotly charts, I will analyze the correlation of glacier loss and tourism patterns.</p>
+        </div>
+
+        <div class="section">
+            <h2>Dataset Descriptions</h2>
+            
+            <h3>Dataset 1: Glacier Area Measurements (1966-2015)</h3>
+            <p>This dataset contains precise measurements of glacier surface areas in Glacier National Park across four time periods: 1966, 1998, 2005, and 2015. The data was collected by the U.S. Geological Survey using aerial photography and satellite imagery to track glacier retreat over a 49-year period. This dataset is significant because it provides quantifiable evidence of climate change impacts in the park, showing an average ice loss of over 30% across all glaciers. Each data point includes glacier coordinates, area measurements for each time period, and calculated ice loss percentages, making it ideal for temporal analysis and spatial visualization.</p>
+
+            <h3>Dataset 2: Park Visitation Statistics by Entrance (1966-2015)</h3>
+            <p>This dataset tracks annual visitor counts at Glacier National Park's various entrance points over the same time period as the glacier measurements. Collected by the National Park Service, it includes total visitor numbers and entrance-specific data with geographic coordinates for each access point for the summer busy season (Jun-Aug). This dataset is significant because it reveals a dramatic 161% increase in park visitation during the same period when glaciers were rapidly disappearing. Visitation by entrance was unavailable for 1966, and data for some entrances is incomplete for other years. I had to personally calculate the yearly values since the data was availble for entrance by month.</p>
+
+            <div class="methodology-box">
+                <h4>Dataset Relationship & Significance:</h4>
+                <p>These datasets are valuable to analyze because they cover the same time periods(1966, 1998, 2005, 2015) and the same geographic area, enabling direct temporal and spatial correlation analysis. They can provide insight for environmental tourism trends and the greater implications of the climate crisis.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Interactive Map</h2>
+            <p>The map below shows the locations of glaciers and park entrances. Glaciers are color-coded by their ice loss percentage, and you can click on markers to see detailed information.</p>
+            <div id="map"></div>
+            <p><em>Map Legend: Red circles = high ice loss (>50%), Orange = moderate loss (30-50%), Yellow = low loss (20-30%), Green = minimal loss (<20%)</em></p>
+        </div>
+
+        <div class="section">
+            <h2>Analysis Methods & Approach</h2>
+            
+            <div class="methodology-box">
+                <h4>Analysis Methods:</h4>
+                <p><strong>1. Temporal Correlation Analysis:</strong> Calculated the Pearson correlation coefficient between total glacier area and annual visitor numbers across the four time periods (1966, 1998, 2005, 2015) to quantify the relationship between ice loss and tourism growth.</p>
+                
+                <p><strong>2. Time Series Visualization:</strong> Created dual-axis line charts to visually compare glacier area decline with visitor number increases over time, allowing for clear identification of trends and inflection points.</p>
+                
+                <p><strong>3. Spatial Analysis:</strong> Mapped the glacier locations with entrance points to see which park areas are most affected by ice loss and how this relates to where visitors can access them.</p>
+                
+                <p><strong>4. Percentage Change Analysis:</strong> Calculated the total percentage changes in both glacier area and visitor numbers to show how big the changes really are.</p>
+                
+                <p><strong>Why I chose these methods:</strong> These seemed like the best ways to handle data that changes over time while also showing where things are located. The correlation gives me actual numbers to back up my findings, while the charts make it easier to see what's happening. Together they help me understand if there's really a connection between disappearing glaciers and more tourists.</p>
+            </div>
+
+            <div class="stats" id="statsContainer">
+            </div>
+
+            <div class="chart-container">
+                <h3>Time Series Analysis</h3>
+                <div id="timeChart"></div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Correlation Analysis</h3>
+                <div id="scatterChart"></div>
+            </div>
+
+            <div class="analysis-box">
+                <h3>Analysis Findings</h3>
+                <p id="resultsText">Loading analysis...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Data Sources: USGS Northern Rocky Mountain Science Center | National Park Service</p>
+        <p>Created for GIST 5300 - Web Mapping and Internet GIS | Web GIS Technologies: Leaflet.js & Plotly.js</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="glacier.js"></script>
+    <script src="visitors.js"></script>
+
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof glacierData === 'undefined' || typeof visitationData === 'undefined') {
+                alert('Error: Data files are missing. Please ensure glacier.js and visitors.js are in the correct directory.');
+                return;
+            }
+
+            var map = L.map('map').setView([48.7596, -113.7870], 10);
+
+            var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            });
+
+            var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri'
+            });
+
+            var topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: © OpenStreetMap contributors, SRTM'
+            });
+
+            streetMap.addTo(map);
+
+            var glaciers = L.layerGroup();
+            var entrances = L.layerGroup();
+
+            function pickColor(loss) {
+                if (loss > 50) return '#e74c3c';  
+                if (loss > 30) return '#f39c12';  
+                if (loss > 20) return '#f1c40f';  
+                return '#27ae60';                  
+            }
+
+            for (var i = 0; i < glacierData.length; i++) {
+                var glacier = glacierData[i];
+                var iceLoss = glacier.percentLoss_1966_2015;
+                
+                var marker = L.circleMarker([glacier.lat, glacier.lon], {
+                    radius: 8,
+                    fillColor: pickColor(iceLoss),
+                    color: '#2c3e50',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                var popupText = `
+                    <h3>${glacier.name}</h3>
+                    <p><strong>Location:</strong> ${glacier.lat.toFixed(4)}°N, ${Math.abs(glacier.lon).toFixed(4)}°W</p>
+                    <p><strong>Ice Lost:</strong> ${iceLoss}%</p>
+                    <p><strong>1966:</strong> ${glacier.area_1966} km²</p>
+                    <p><strong>1998:</strong> ${glacier.area_1998} km²</p>
+                    <p><strong>2005:</strong> ${glacier.area_2005} km²</p>
+                    <p><strong>2015:</strong> ${glacier.area_2015} km²</p>
+                    <p><strong>Total Lost:</strong> ${(glacier.area_1966 - glacier.area_2015).toFixed(2)} km²</p>
+                    <p><strong>Closest Entrance:</strong> ${glacier.nearestEntrance}</p>
+                `;
+
+                marker.bindPopup(popupText);
+                glaciers.addLayer(marker);
+            }
+
+            var latest = visitationData[visitationData.length - 1]; 
+            
+            for (var j = 0; j < latest.entrances.length; j++) {
+                var entrance = latest.entrances[j];
+                
+                var entranceMarker = L.marker([entrance.lat, entrance.lon], {
+                    icon: L.divIcon({
+                        className: 'entrance-icon',
+                        html: '<div style="background: #3498db; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+                        iconSize: [20, 20]
+                    })
+                });
+
+                var entranceInfo = `
+                    <h3>${entrance.name}</h3>
+                    <p><strong>Location:</strong> ${entrance.lat.toFixed(4)}°N, ${Math.abs(entrance.lon).toFixed(4)}°W</p>
+                    <p><strong>2015 Visitors:</strong> ${entrance.visitors.toLocaleString()}</p>
+                    <p><strong>Facilities:</strong> ${entrance.facilities.join(', ')}</p>
+                `;
+                
+                entranceMarker.bindPopup(entranceInfo);
+                entrances.addLayer(entranceMarker);
+            }
+
+            glaciers.addTo(map);
+            entrances.addTo(map);
+
+            var baseLayers = {
+                "Street Map": streetMap,
+                "Satellite": satelliteMap,
+                "Topographic": topoMap
+            };
+
+            var overlays = {
+                "Glaciers": glaciers,
+                "Park Entrances": entrances
+            };
+
+            L.control.layers(baseLayers, overlays).addTo(map);
+
+            var legend = L.control({position: 'bottomright'});
+            legend.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4>Ice Loss</h4>
+                    <div><span style="background: #27ae60; width: 15px; height: 15px; display: inline-block; border-radius: 50%; margin-right: 5px;"></span>0-20%</div>
+                    <div><span style="background: #f1c40f; width: 15px; height: 15px; display: inline-block; border-radius: 50%; margin-right: 5px;"></span>20-30%</div>
+                    <div><span style="background: #f39c12; width: 15px; height: 15px; display: inline-block; border-radius: 50%; margin-right: 5px;"></span>30-50%</div>
+                    <div><span style="background: #e74c3c; width: 15px; height: 15px; display: inline-block; border-radius: 50%; margin-right: 5px;"></span>>50%</div>
+                `;
+                div.style.background = 'white';
+                div.style.padding = '10px';
+                div.style.borderRadius = '5px';
+                div.style.border = '1px solid #ccc';
+                return div;
+            };
+            legend.addTo(map);
+
+            var totalGlaciers = glacierData.length;
+            var area1966 = 0;
+            var area2015 = 0;
+
+            for (var k = 0; k < glacierData.length; k++) {
+                area1966 += glacierData[k].area_1966;
+                area2015 += glacierData[k].area_2015;
+            }
+
+            var areaLost = area1966 - area2015;
+            var percentLost = (areaLost / area1966) * 100;
+
+            var visitors1966 = visitationData[0].totalVisitors;
+            var visitors2015 = visitationData[visitationData.length - 1].totalVisitors;
+            var visitorGrowth = ((visitors2015 - visitors1966) / visitors1966) * 100;
+
+            var yearList = [];
+            var glacierSizes = [];
+            var visitorNumbers = [];
+
+            for (var m = 0; m < visitationData.length; m++) {
+                var yearData = visitationData[m];
+                yearList.push(yearData.year);
+                visitorNumbers.push(yearData.totalVisitors);
+                
+                var totalArea = 0;
+                for (var n = 0; n < glacierData.length; n++) {
+                    var areaField = 'area_' + yearData.year;
+                    totalArea += glacierData[n][areaField] || 0;
+                }
+                glacierSizes.push(totalArea);
+            }
+
+            function calcCorrelation(x, y) {
+                var n = x.length;
+                var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+                
+                for (var i = 0; i < n; i++) {
+                    sumX += x[i];
+                    sumY += y[i];
+                    sumXY += x[i] * y[i];
+                    sumX2 += x[i] * x[i];
+                    sumY2 += y[i] * y[i];
+                }
+                
+                var numerator = n * sumXY - sumX * sumY;
+                var denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+                
+                return numerator / denominator;
+            }
+
+            var correlation = calcCorrelation(glacierSizes, visitorNumbers);
+
+            document.getElementById('statsContainer').innerHTML = `
+                <div class="stat-box">
+                    <div class="number">${totalGlaciers}</div>
+                    <div class="label">Glaciers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">${percentLost.toFixed(1)}%</div>
+                    <div class="label">Ice Lost</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">${areaLost.toFixed(1)}</div>
+                    <div class="label">km² Gone</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">${visitorGrowth.toFixed(0)}%</div>
+                    <div class="label">More Visitors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">${correlation.toFixed(3)}</div>
+                    <div class="label">Correlation</div>
+                </div>
+            `;
+
+            var glacierTrace = {
+                x: yearList,
+                y: glacierSizes,
+                name: 'Glacier Area (km²)',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#3498db', width: 3},
+                yaxis: 'y'
+            };
+
+            var visitorTrace = {
+                x: yearList,
+                y: visitorNumbers,
+                name: 'Visitors',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#e74c3c', width: 3},
+                yaxis: 'y2'
+            };
+
+            var timeLayout = {
+                title: 'Temporal Analysis: Glacier Area Decline vs. Park Visitation Growth (1966-2015)',
+                xaxis: {title: 'Year'},
+                yaxis: {
+                    title: 'Glacier Area (km²)',
+                    titlefont: {color: '#3498db'},
+                    tickfont: {color: '#3498db'}
+                },
+                yaxis2: {
+                    title: 'Number of Visitors',
+                    titlefont: {color: '#e74c3c'},
+                    tickfont: {color: '#e74c3c'},
+                    overlaying: 'y',
+                    side: 'right'
+                }
+            };
+
+            Plotly.newPlot('timeChart', [glacierTrace, visitorTrace], timeLayout, {responsive: true});
+
+            var scatterData = {
+                x: glacierSizes,
+                y: visitorNumbers,
+                mode: 'markers',
+                type: 'scatter',
+                text: yearList.map(year => `${year}`),
+                marker: {
+                    size: 12,
+                    color: ['#27ae60', '#f39c12', '#e67e22', '#e74c3c']
+                }
+            };
+
+            var scatterLayout = {
+                title: 'Correlation Analysis: Glacier Area vs. Annual Park Visitation',
+                xaxis: {title: 'Total Glacier Area (km²)'},
+                yaxis: {title: 'Annual Visitors'}
+            };
+
+            Plotly.newPlot('scatterChart', [scatterData], scatterLayout, {responsive: true});
+
+            var findings = `My analysis reveals a correlation of ${correlation.toFixed(3)} between glacier area and park visitation over the 49-year study period. The data shows that as total glacier area decreased by ${percentLost.toFixed(1)}% (a significant loss of ${areaLost.toFixed(1)} km²), park visitation increased dramatically by ${visitorGrowth.toFixed(0)}% from ${visitors1966.toLocaleString()} to ${visitors2015.toLocaleString()} visitors. This relationship suggests that climate change awareness may be driving increased visitation as people rush to see these laciers before they disappear completely. The correlation of glacier retreat and tourism growth highlights the complex relationship between environmental change and human behavior in response to climate impacts.`;
+
+            document.getElementById('resultsText').textContent = findings;
+        });
+    </script>
+</body>
+</html>
